@@ -9,15 +9,21 @@ import (
 	"github.com/labstack/gommon/log"
 )
 
-type oauthType struct {
-	authURL   string
-	logoutURL string
+type oauthConfig struct {
+	authURL               string
+	logoutURL             string
+	afterLogoutRedirect   string
+	loginAuthCodeCallback string
+	appId                 string
 }
 
 // from http://10.100.196.60:8080/auth/realms/silvade/.well-known/openid-configuration
-var oauth = oauthType{
-	authURL:   "http://10.100.196.60:8080/auth/realms/silvade/protocol/openid-connect/auth",
-	logoutURL: "http://10.100.196.60:8080/auth/realms/silvade/protocol/openid-connect/logout",
+var config = oauthConfig{
+	authURL:               "http://10.100.196.60:8080/auth/realms/silvade/protocol/openid-connect/auth",
+	logoutURL:             "http://10.100.196.60:8080/auth/realms/silvade/protocol/openid-connect/logout",
+	afterLogoutRedirect:   "http://localhost:8080/",
+	loginAuthCodeCallback: "http://localhost:8080/loginAuthCodeCallback",
+	appId:                 "billingApp",
 }
 
 type AppVar struct {
@@ -47,7 +53,7 @@ func main() {
 
 func home(w http.ResponseWriter, r *http.Request) {
 	//t := template.Must(template.ParseFiles("src/client/template/index.html"))
-	err := t.Execute(w, nil)
+	err := t.Execute(w, appVar)
 	if err != nil {
 		http.NotFound(w, r)
 		return
@@ -57,7 +63,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 
 func login(w http.ResponseWriter, r *http.Request) {
 
-	req, err := http.NewRequest("GET", oauth.authURL, nil)
+	req, err := http.NewRequest("GET", config.authURL, nil)
 	if err != nil {
 		log.Print(err)
 		return
@@ -65,9 +71,9 @@ func login(w http.ResponseWriter, r *http.Request) {
 
 	q := url.Values{}
 	q.Add("state", "123")
-	q.Add("client_id", "billingApp")
+	q.Add("client_id", config.appId)
 	q.Add("response_type", "code")
-	q.Add("redirect_uri", "http://localhost:8080/loginAuthCodeCallback")
+	q.Add("redirect_uri", config.loginAuthCodeCallback)
 
 	req.URL.RawQuery = q.Encode()
 	http.Redirect(w, r, req.URL.String(), http.StatusSeeOther)
@@ -87,14 +93,14 @@ func loginAuthCodeCallback(w http.ResponseWriter, r *http.Request) {
 
 func logout(w http.ResponseWriter, r *http.Request) {
 	q := url.Values{}
-	q.Add("redirect_uri", "http://localhost:8080")
+	q.Add("redirect_uri", config.afterLogoutRedirect)
 
-	loURL, err := url.Parse(oauth.logoutURL)
+	loURL, err := url.Parse(config.logoutURL)
 	if err != nil {
 		log.Print(err)
 	}
 	loURL.RawQuery = q.Encode()
-
+	appVar = AppVar{}
 	http.Redirect(w, r, loURL.String(), http.StatusSeeOther)
 
 }

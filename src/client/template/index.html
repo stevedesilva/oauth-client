@@ -11,6 +11,7 @@
           integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
     <title>Hello, world!</title>
+    <link rel="icon" href="data:,">
 </head>
 
 <body style="padding-top: 5rem;">
@@ -34,6 +35,9 @@
                 <a class="nav-link" href="/logout">Logout</a>
             </li>
 
+            <li class="nav-item">
+                <a class="nav-link" href="/exchangeToken">exchangeToken</a>
+            </li>
         </ul>
     </div>
 </nav>
@@ -64,6 +68,26 @@
                 <td>{{.State}}</td>
 
             </tr>
+
+            <tr>
+                <th scope="row">Access Token</th>
+                <td style="word-break: break-all">{{.AccessToken}}</td>
+            </tr>
+            <tr>
+                <th scope="row">Refresh Token</th>
+                <td style="word-break: break-all">{{.RefreshToken}}</td>
+            </tr>
+            <tr>
+                <th scope="row">Scope</th>
+                <td style="word-break: break-all">{{.Scope}}</td>
+            </tr>
+
+            <tr>
+                <th scope="row">SessionState</th>
+                <td style="word-break: break-all">{{.SessionStateEx}}</td>
+            </tr>
+
+
 
             </tbody>
         </table>
